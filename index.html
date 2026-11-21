@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schul-App</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#4f8ef7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{--r:14px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:root[data-theme=light]{color-scheme:light;--bg:#f5f7fa;--sf:#fff;--tx:#1b1f24;--mu:#5f6b7a;--ac:#4f8ef7;--bd:#e3e8ef;--dg:#e5484d;--on:#fff}
+:root[data-theme=dark]{color-scheme:dark;--bg:#121418;--sf:#1e222a;--tx:#eceff4;--mu:#9aa5b4;--ac:#6ea8fe;--bd:#2c323c;--dg:#ff6b70;--on:#0b1220}
+:root[data-theme=nature]{color-scheme:light;--bg:#eef5ea;--sf:#fff;--tx:#1e3322;--mu:#5b7a5f;--ac:#3fa34d;--bd:#d5e5cf;--dg:#d64545;--on:#fff}
+:root[data-theme=ocean]{color-scheme:dark;--bg:#0d2538;--sf:#14364f;--tx:#e6f4ff;--mu:#8fb8d6;--ac:#2ec4d6;--bd:#1f4a6a;--dg:#ff7b7b;--on:#06222b}
+:root[data-theme=cyberpunk]{color-scheme:dark;--bg:#0b0614;--sf:#1a1030;--tx:#f2e9ff;--mu:#b28dff;--ac:#ff2e97;--bd:#2d1b52;--dg:#ff5c5c;--on:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);-webkit-tap-highlight-color:transparent}
+#app{max-width:760px;margin:0 auto;min-height:100dvh;padding:0 16px calc(88px + env(safe-area-inset-bottom))}
+h1{font-size:26px;margin:0}h3{margin:0 0 10px;font-size:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(18px + env(safe-area-inset-top)) 0 12px}
+.muted{color:var(--mu)}small{font-size:12px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin:12px 0}
+.hero{text-align:center}.big{font-size:44px;font-weight:700;color:var(--ac)}
+.list{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;font:inherit;cursor:pointer}
+.row.static{cursor:default}
+.row .grow{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.row .grow b{overflow:hidden;text-overflow:ellipsis}
+.bar{width:6px;align-self:stretch;border-radius:4px;flex:none}
+.val{font-size:20px;font-weight:700;color:var(--ac)}
+.btn,.chip{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:var(--ac);color:var(--on);font-weight:600;cursor:pointer}
+.chip{padding:7px 12px;font-size:13px;background:var(--sf);color:var(--tx);border:1px solid var(--bd)}
+.chip.on{background:var(--ac);color:var(--on);border-color:var(--ac)}
+.ghost{background:transparent;color:var(--ac);border:1px solid var(--bd)}
+.danger{background:transparent;color:var(--dg);border:1px solid var(--bd)}
+.icon{background:none;border:0;color:var(--mu);font-size:18px;cursor:pointer;padding:4px 8px}
+input,select,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:120px;resize:vertical}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mu)}
+.inline{display:flex;gap:8px}.inline input{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.result{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px dashed var(--ac)}
+.empty{text-align:center;padding:18px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.slot{display:grid;grid-template-columns:62px 1fr 90px;gap:8px;align-items:center;padding:6px 8px;border-radius:12px;border:1px solid transparent}
+.slot.now{border-color:var(--ac);background:var(--sf)}
+.time{display:flex;flex-direction:column;font-weight:700}.time small{font-weight:400;color:var(--mu)}
+.hw{display:flex;gap:12px;align-items:center;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px}
+.hw input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--ac)}
+.hw .grow{flex:1;display:flex;flex-direction:column;min-width:0}
+.hw.done .grow b{text-decoration:line-through;color:var(--mu)}
+.late{color:var(--dg)}
+table.grid{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed;font-size:12px}
+table.grid th{color:var(--mu);font-weight:600;padding:4px}
+table.grid td{height:38px;text-align:center;border-radius:8px;background:var(--sf);border:1px solid var(--bd);cursor:pointer;overflow:hidden;color:#fff;font-weight:600}
+table.grid td.empty{color:var(--mu)}
+#cv{width:100%;aspect-ratio:10/7;background:#fff;border:1px solid var(--bd);border-radius:12px;touch-action:none;display:block}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.sw{width:28px;height:28px;border-radius:50%;border:2px solid var(--bd);padding:0;cursor:pointer}
+.sw.on{outline:3px solid var(--ac);outline-offset:1px}
+.xpbar{height:10px;background:var(--bg);border-radius:8px;overflow:hidden;margin:8px 0}
+.xpbar i{display:block;height:100%;background:var(--ac)}
+.swatch{display:flex;gap:4px}.swatch i{width:18px;height:18px;border-radius:50%;border:1px solid var(--bd)}
+#tabs{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--bd);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+#tabs .in{display:flex;width:100%;max-width:760px}
+#tabs button{flex:1;background:none;border:0;color:var(--mu);font:inherit;font-size:11px;padding:8px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+#tabs button span{font-size:20px}
+#tabs button.on{color:var(--ac);font-weight:700}
+#toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:9;max-width:90%;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div id="app"><main id="view"></main></div>
+<nav id="tabs"></nav>
+<div id="toast" role="status"></div>
+<script>
+'use strict';
+//#PURE-START
+const STEP = 1 / 3;
+const PERIODS = ['08:00-08:45','08:50-09:35','09:55-10:40','10:45-11:30','11:50-12:35','12:40-13:25','13:30-14:15','14:20-15:05'];
+function parseNum(s){ if (s == null) return NaN; s = String(s).trim().replace(',', '.'); return s === '' ? NaN : Number(s); }
+function parseGrade(input, sys){
+  input = String(input || '').trim(); if (!input) return null;
+  if (sys === 'points'){ const p = Math.round(parseNum(input)); return (p >= 0 && p <= 15) ? p : null; }
+  let t = 0; const last = input.slice(-1);
+  if (last === '+' || last === '-' || last === '–'){ t = last === '+' ? -STEP : STEP; input = input.slice(0, -1).trim(); }
+  const g = parseNum(input); if (!(g >= 1 && g <= 6)) return null;
+  return Math.min(6, Math.max(1, g + t));
+}
+function fmtGrade(v, sys){
+  if (sys === 'points') return String(Math.round(v));
+  const b = Math.min(6, Math.max(1, Math.round(v))), d = v - b;
+  return b + (d < -0.17 ? '+' : d > 0.17 ? '-' : '');
+}
+function fmtAvg(v, sys){ return v.toFixed(sys === 'points' ? 1 : 2).replace('.', ','); }
+function avg(grades){
+  let s = 0, w = 0;
+  for (const g of grades){ if (g.weight > 0){ s += g.value * g.weight; w += g.weight; } }
+  return w > 0 ? s / w : null;
+}
+function overall(subjects){
+  let s = 0, n = 0;
+  for (const x of subjects){ const a = avg(x.grades); if (a != null){ s += a; n++; } }
+  return n ? s / n : null;
+}
+function wish(grades, target, weight, sys){
+  let s = 0, w = 0;
+  for (const g of grades){ if (g.weight > 0){ s += g.value * g.weight; w += g.weight; } }
+  weight = Math.max(0.1, weight);
+  const x = (target * (w + weight) - s) / weight;
+  const hi = sys === 'points', best = hi ? 15 : 1, worst = hi ? 0 : 6;
+  if (hi ? x > best : x < best) return { status: 'impossible', needed: best };
+  if (hi ? x <= worst : x >= worst) return { status: 'safe', needed: worst };
+  const needed = hi ? Math.min(15, Math.max(0, Math.ceil(x - 1e-4)))
+                    : Math.min(6, Math.max(1, Math.floor(x / STEP + 1e-4) * STEP));
+  return { status: 'needed', needed };
+}
+const toPoints = g => Math.min(15, Math.max(0, Math.round(17 - 3 * g)));
+const toClassic = p => Math.min(6, Math.max(1, (17 - p) / 3));
+const levelOf = xp => Math.floor(Math.sqrt(xp / 50)) + 1;
+const xpFor = l => 50 * (l - 1) * (l - 1);
+function iso(d){ return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function parseISO(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+function mondayOf(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+const dayIdx = d => (d.getDay() + 6) % 7;
+function weekOf(date, refISO){
+  const ref = mondayOf(parseISO(refISO) || date);
+  const w = Math.round((mondayOf(date) - ref) / 604800000);
+  return (((w % 2) + 2) % 2 === 0) ? 'A' : 'B';
+}
+function currentPeriod(now){
+  const m = now.getHours() * 60 + now.getMinutes();
+  for (let i = 0; i < PERIODS.length; i++){
+    const [a, b] = PERIODS[i].split('-').map(t => { const [h, mi] = t.split(':').map(Number); return h * 60 + mi; });
+    if (m >= a && m < b) return i;
+  }
+  return -1;
+}
+function daysUntil(s){ const d = parseISO(s); if (!d) return null; const t = new Date(); return Math.round((d - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000); }
+//#PURE-END
+
+// ---------- Helfer ----------
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr'];
+const COLORS = ['#4F8EF7', '#F76B6B', '#44C27A', '#F7B84F', '#A06BF7', '#2EC4D6', '#F78FB3', '#8D9AA8'];
+const THEMES = {
+  nature:    { name: 'Natur',     price: 100, desc: 'Frisches Grün, hell und ruhig', sw: ['#eef5ea', '#3fa34d'] },
+  ocean:     { name: 'Ozean',     price: 120, desc: 'Tiefes Blau mit Türkis-Akzent', sw: ['#0d2538', '#2ec4d6'] },
+  cyberpunk: { name: 'Cyberpunk', price: 150, desc: 'Dunkles Violett mit Neon-Pink', sw: ['#0b0614', '#ff2e97'] }
+};
+const TABS = [['grades', '📊', 'Noten'], ['plan', '🗓️', 'Plan'], ['tasks', '✅', 'Aufgaben'], ['notes', '📝', 'Notizen'], ['me', '🏆', 'Profil']];
+
+// ---------- Daten ----------
+const KEY = 'schulapp.v1';
+function defaults(){
+  return {
+    settings: { system: 'classic', mode: 'system', theme: 'default', ab: false, weekARef: iso(mondayOf(new Date())) },
+    xp: 0, coins: 0, streak: 0, lastLogin: '', gradeRewardDay: '', gradeRewardsToday: 0,
+    unlocked: ['default'], subjects: [], timetable: [], homework: [], exams: []
+  };
+}
+function load(){
+  const d = defaults();
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw){ const o = JSON.parse(raw); Object.assign(d, o); d.settings = Object.assign(defaults().settings, o.settings || {}); }
+  } catch (e) {}
+  return d;
+}
+let S = load();
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('Speichern fehlgeschlagen – Speicher voll? Exportiere ein Backup.'); }
+}
+const SYS = () => S.settings.system;
+const sub = id => S.subjects.find(s => s.id === id);
+const subName = id => { const s = sub(id); return s ? s.name : '?'; };
+
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400);
+}
+function reward(xp, coins){
+  const before = levelOf(S.xp);
+  S.xp += xp; S.coins += coins;
+  const after = levelOf(S.xp);
+  toast('+' + xp + ' XP' + (coins ? ' · +' + coins + ' 🪙' : '') + (after > before ? ' · Level ' + after + '!' : ''));
+}
+
+// ---------- Theme ----------
+function applyTheme(){
+  const t = S.settings.theme; let name;
+  if (t !== 'default' && THEMES[t]) name = t;
+  else {
+    const m = S.settings.mode;
+    const dark = m === 'dark' || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+    name = dark ? 'dark' : 'light';
+  }
+  document.documentElement.dataset.theme = name;
+  const meta = $('meta[name=theme-color]');
+  if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#4f8ef7';
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+// ---------- UI-Zustand ----------
+const V = { tab: 'grades', sub: null, wish: '', planDay: Math.min(dayIdx(new Date()), 4), planWeek: null, planGrid: false, showDone: false, note: null };
+const D = { color: '#111111', size: 5, erase: false, undo: [] };
+
+function subOpts(sel){
+  return S.subjects.map(s => '<option value="' + s.id + '"' + (s.id === sel ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
+}
+function weightOpts(sel){
+  return [[1, '×1 (Test / mündlich)'], [2, '×2 (Klassenarbeit)'], [3, '×3'], [0.5, '×0,5']]
+    .map(([v, l]) => '<option value="' + v + '"' + (v === sel ? ' selected' : '') + '>' + l + '</option>').join('');
+}
+function fmtDate(s){ const d = parseISO(s); return d ? d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) : ''; }
+function countdown(s){
+  const n = daysUntil(s); if (n == null) return '';
+  return n < 0 ? 'vorbei' : n === 0 ? 'Heute' : n === 1 ? 'Morgen' : 'in ' + n + ' Tagen';
+}
+
+// ---------- Ansichten ----------
+function viewGrades(){
+  if (V.sub) return viewSubject();
+  const ov = overall(S.subjects), sys = SYS();
+  return '<header class="top"><h1>Noten</h1><button class="chip" data-act="toggleSys">' + (sys === 'classic' ? 'Note 1–6' : 'Punkte 0–15') + ' ⇄</button></header>'
+    + '<section class="card hero"><div class="muted">Gesamtschnitt</div><div class="big">' + (ov == null ? '–' : fmtAvg(ov, sys)) + '</div></section>'
+    + '<section class="list">' + (S.subjects.map(s => {
+        const a = avg(s.grades);
+        return '<button class="row" data-act="openSub" data-id="' + s.id + '"><i class="bar" style="background:' + esc(s.color) + '"></i>'
+          + '<span class="grow"><b>' + esc(s.name) + '</b><small class="muted">' + s.grades.length + (s.grades.length === 1 ? ' Note' : ' Noten') + '</small></span>'
+          + '<span class="val">' + (a == null ? '–' : fmtAvg(a, sys)) + '</span></button>';
+      }).join('') || '<p class="muted empty">Noch keine Fächer. Lege unten dein erstes Fach an.</p>') + '</section>'
+    + '<form class="card inline" data-form="addSubject"><input name="name" placeholder="Neues Fach (z. B. Mathe)" maxlength="40" required><button class="btn">Hinzufügen</button></form>';
+}
+
+function viewSubject(){
+  const s = sub(V.sub); if (!s){ V.sub = null; return viewGrades(); }
+  const sys = SYS(), a = avg(s.grades);
+  return '<header class="top"><button class="chip" data-act="backSub">‹ Zurück</button><h1 style="flex:1;text-align:right">' + esc(s.name) + '</h1></header>'
+    + '<section class="card hero"><div class="muted">Durchschnitt</div><div class="big">' + (a == null ? '–' : fmtAvg(a, sys)) + '</div></section>'
+    + '<section class="list">' + (s.grades.map(g =>
+        '<div class="row static"><span class="grow"><b>' + esc(g.title || 'Note') + '</b><small class="muted">' + esc(fmtDate(g.date)) + ' · ×' + String(g.weight).replace('.', ',') + '</small></span>'
+        + '<span class="val">' + fmtGrade(g.value, sys) + '</span><button class="icon" data-act="delGrade" data-id="' + g.id + '" aria-label="Löschen">🗑️</button></div>'
+      ).join('') || '<p class="muted empty">Noch keine Noten.</p>') + '</section>'
+    + '<form class="card" data-form="addGrade"><h3>Note eintragen</h3><div class="stack">'
+    + '<input name="title" placeholder="Bezeichnung (z. B. Klassenarbeit 1)" maxlength="60">'
+    + '<div class="grid2"><label>' + (sys === 'classic' ? 'Note (z. B. 2+, 3, 4-)' : 'Punkte (0–15)') + '<input name="value" inputmode="' + (sys === 'classic' ? 'text' : 'numeric') + '" required></label>'
+    + '<label>Gewichtung<select name="w">' + weightOpts(1) + '</select></label></div>'
+    + '<button class="btn">Speichern</button></div></form>'
+    + '<form class="card" data-form="wish"><h3>Wunschnote berechnen</h3><div class="grid2">'
+    + '<label>Ziel-Endnote<input name="t" inputmode="decimal" placeholder="' + (sys === 'classic' ? '2,0' : '11') + '" required></label>'
+    + '<label>Nächste Arbeit zählt<select name="w">' + weightOpts(2) + '</select></label></div>'
+    + '<button class="btn">Berechnen</button>' + (V.wish ? '<p class="result">' + esc(V.wish) + '</p>' : '') + '</form>'
+    + '<form class="card" data-form="subInfo"><h3>Fach-Infos</h3><div class="grid2"><label>Lehrer-Kürzel<input name="teacher" maxlength="8" value="' + esc(s.teacher || '') + '"></label>'
+    + '<label>Raum<input name="room" maxlength="10" value="' + esc(s.room || '') + '"></label></div><button class="btn ghost">Übernehmen</button></form>'
+    + '<button class="btn danger" data-act="delSub" style="width:100%">Fach löschen</button>';
+}
+
+function slotFor(day, p, W){
+  return S.timetable.find(t => t.day === day && t.period === p && (t.week === 'both' || t.week === W));
+}
+function viewPlan(){
+  const now = new Date(), cur = weekOf(now, S.settings.weekARef), ab = S.settings.ab;
+  if (!V.planWeek) V.planWeek = cur;
+  const W = ab ? V.planWeek : cur, today = dayIdx(now), cp = currentPeriod(now);
+  let banner = '';
+  const cs = today < 5 && cp >= 0 ? slotFor(today, cp, cur) : null;
+  if (cs && sub(cs.subjectId)){
+    const s = sub(cs.subjectId);
+    banner = '<section class="card"><div class="muted">Jetzt</div><b style="font-size:18px">' + esc(s.name) + '</b> <span class="muted">· Raum ' + esc(cs.room || s.room || '–') + (s.teacher ? ' · ' + esc(s.teacher) : '') + '</span></section>';
+  }
+  let h = '<header class="top"><h1>Stundenplan</h1><span class="chip on">' + (ab ? 'Woche ' + cur : 'Woche') + '</span></header>' + banner;
+  h += '<div class="chips"><button class="chip' + (ab ? ' on' : '') + '" data-act="toggleAB">A-/B-Wochen</button>'
+     + (ab ? '<button class="chip" data-act="swapAB">A ⇄ B tauschen</button><button class="chip' + (W === 'A' ? ' on' : '') + '" data-act="setWeek" data-w="A">Plan A</button><button class="chip' + (W === 'B' ? ' on' : '') + '" data-act="setWeek" data-w="B">Plan B</button>' : '')
+     + '<button class="chip' + (V.planGrid ? ' on' : '') + '" data-act="toggleGrid">Wochenübersicht</button></div>';
+  if (!S.subjects.length) return h + '<p class="muted empty">Lege zuerst unter „Noten“ ein paar Fächer an.</p>';
+  if (V.planGrid){
+    h += '<table class="grid"><tr><th></th>' + DAYS.map(d => '<th>' + d + '</th>').join('') + '</tr>';
+    for (let p = 0; p < PERIODS.length; p++){
+      h += '<tr><th>' + (p + 1) + '</th>';
+      for (let d = 0; d < 5; d++){
+        const sl = slotFor(d, p, W), s = sl && sub(sl.subjectId);
+        h += s ? '<td data-act="gridCell" data-d="' + d + '" style="background:' + esc(s.color) + '">' + esc(s.name.slice(0, 4)) + '</td>'
+               : '<td class="empty" data-act="gridCell" data-d="' + d + '">·</td>';
+      }
+      h += '</tr>';
+    }
+    return h + '</table>';
+  }
+  h += '<div class="chips">' + DAYS.map((d, i) => '<button class="chip' + (V.planDay === i ? ' on' : '') + '" data-act="setDay" data-d="' + i + '">' + d + '</button>').join('') + '</div>';
+  for (let p = 0; p < PERIODS.length; p++){
+    const sl = slotFor(V.planDay, p, W);
+    h += '<div class="slot' + (V.planDay === today && p === cp ? ' now' : '') + '"><span class="time">' + (p + 1) + '. <small>' + PERIODS[p] + '</small></span>'
+       + '<select data-change="slotSub" data-p="' + p + '"><option value="">–</option>' + subOpts(sl && sl.subjectId) + '</select>'
+       + '<input placeholder="Raum" maxlength="10" data-change="slotRoom" data-p="' + p + '" value="' + esc(sl ? (sl.room || '') : '') + '"' + (sl ? '' : ' disabled') + '></div>';
+  }
+  return h;
+}
+
+function viewTasks(){
+  const open = S.homework.filter(x => !x.done).sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || b.prio - a.prio);
+  const done = S.homework.filter(x => x.done);
+  const exams = S.exams.filter(e => { const n = daysUntil(e.date); return n != null && n >= 0; }).sort((a, b) => a.date.localeCompare(b.date));
+  const t = today();
+  const hw = x => '<div class="hw' + (x.done ? ' done' : '') + '"><input type="checkbox" data-act="doneHw" data-id="' + x.id + '"' + (x.done ? ' checked' : '') + ' aria-label="Erledigt">'
+    + '<span class="grow"><b>' + esc(x.text) + '</b><small class="muted">' + esc(subName(x.subjectId)) + (x.due ? ' · <span class="' + (!x.done && x.due < t ? 'late' : '') + '">' + esc(fmtDate(x.due)) + '</span>' : '') + (x.prio === 2 ? ' · ❗ wichtig' : '') + '</small></span>'
+    + '<button class="icon" data-act="delHw" data-id="' + x.id + '" aria-label="Löschen">🗑️</button></div>';
+  let h = '<header class="top"><h1>Aufgaben</h1></header>';
+  if (!S.subjects.length) return h + '<p class="muted empty">Lege zuerst unter „Noten“ ein paar Fächer an.</p>';
+  h += '<form class="card" data-form="addHw"><h3>Neue Hausaufgabe</h3><div class="stack"><input name="text" placeholder="Was ist zu tun?" maxlength="120" required>'
+    + '<div class="grid3"><label>Fach<select name="s">' + subOpts() + '</select></label><label>Fällig<input type="date" name="due"></label>'
+    + '<label>Wichtigkeit<select name="p"><option value="1">Normal</option><option value="2">Hoch</option><option value="0">Niedrig</option></select></label></div>'
+    + '<button class="btn">Hinzufügen</button></div></form>';
+  h += '<div class="list">' + (open.map(hw).join('') || '<p class="muted empty">Alles erledigt 🎉</p>') + '</div>';
+  if (done.length) h += '<button class="chip" data-act="toggleDone">' + (V.showDone ? 'Erledigte ausblenden' : 'Erledigte anzeigen (' + done.length + ')') + '</button>'
+    + (V.showDone ? '<div class="list">' + done.map(hw).join('') + '</div>' : '');
+  h += '<header class="top"><h1 style="font-size:22px">Klausuren</h1></header><div class="list">'
+    + (exams.map(e => '<div class="hw"><span class="grow"><b>' + esc(subName(e.subjectId)) + (e.title ? ' – ' + esc(e.title) : '') + '</b><small class="muted">' + esc(fmtDate(e.date)) + '</small></span>'
+        + '<span class="val" style="font-size:15px">' + countdown(e.date) + '</span><button class="icon" data-act="delExam" data-id="' + e.id + '" aria-label="Löschen">🗑️</button></div>').join('')
+      || '<p class="muted empty">Keine anstehenden Klausuren.</p>') + '</div>'
+    + '<form class="card" data-form="addExam"><h3>Klausur eintragen</h3><div class="stack"><div class="grid3"><label>Fach<select name="s">' + subOpts() + '</select></label>'
+    + '<label>Datum<input type="date" name="date" required></label><label>Titel<input name="title" maxlength="40" placeholder="optional"></label></div><button class="btn">Eintragen</button></div></form>';
+  return h;
+}
+
+function getNote(){
+  if (!V.note) return null;
+  const s = sub(V.note.sid); const n = s && s.notes.find(x => x.id === V.note.nid);
+  return n ? { s, n } : null;
+}
+function viewNotes(){
+  if (V.note){
+    const g = getNote(); if (!g){ V.note = null; return viewNotes(); }
+    const cols = ['#111111', '#e5484d', '#2f6fed', '#2ea043', '#f0a500'];
+    return '<header class="top"><button class="chip" data-act="backNote">‹ Zurück</button><span class="muted">' + esc(g.s.name) + '</span></header>'
+      + '<div class="stack"><input id="nTitle" placeholder="Titel" maxlength="60" value="' + esc(V.dTitle != null ? V.dTitle : g.n.title) + '">'
+      + '<textarea id="nText" placeholder="Notizen, Zusammenfassung …">' + esc(V.dText != null ? V.dText : g.n.text) + '</textarea>'
+      + '<canvas id="cv" width="800" height="560"></canvas></div>'
+      + '<div class="tools">' + cols.map(c => '<button class="sw' + (!D.erase && D.color === c ? ' on' : '') + '" data-act="toolColor" data-c="' + c + '" style="background:' + c + '" aria-label="Farbe"></button>').join('')
+      + '<button class="chip' + (D.erase ? ' on' : '') + '" data-act="toolErase">Radierer</button><button class="chip" data-act="undo">↶</button><button class="chip" data-act="clearCv">Leeren</button>'
+      + '<input type="range" min="2" max="24" value="' + D.size + '" data-input="size" style="width:110px" aria-label="Stiftdicke"></div>'
+      + '<div class="inline"><button class="btn" data-act="saveNote" style="flex:1">Speichern</button><button class="btn danger" data-act="delNote">Löschen</button></div>';
+  }
+  let h = '<header class="top"><h1>Notizen</h1></header>';
+  if (!S.subjects.length) return h + '<p class="muted empty">Lege zuerst unter „Noten“ ein paar Fächer an.</p>';
+  h += '<form class="card inline" data-form="addNote"><select name="s" style="flex:0 0 38%">' + subOpts() + '</select><input name="title" placeholder="Titel der Notiz" maxlength="60" required><button class="btn">+</button></form>';
+  let any = false;
+  for (const s of S.subjects){
+    if (!s.notes.length) continue; any = true;
+    h += '<h3 style="margin-top:18px"><span style="color:' + esc(s.color) + '">●</span> ' + esc(s.name) + '</h3><div class="list">'
+      + s.notes.map(n => '<button class="row" data-act="openNote" data-sid="' + s.id + '" data-nid="' + n.id + '"><span class="grow"><b>' + esc(n.title || 'Ohne Titel') + '</b><small class="muted">' + esc((n.text || '').slice(0, 50)) + (n.drawing ? ' · ✏️ Skizze' : '') + '</small></span></button>').join('') + '</div>';
+  }
+  return h + (any ? '' : '<p class="muted empty">Noch keine Notizen.</p>');
+}
+
+function viewMe(){
+  const l = levelOf(S.xp), cur = S.xp - xpFor(l), need = xpFor(l + 1) - xpFor(l), m = S.settings.mode;
+  let h = '<header class="top"><h1>Profil</h1></header>'
+    + '<section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:22px">Level ' + l + '</b><span>🪙 ' + S.coins + '</span></div>'
+    + '<div class="xpbar"><i style="width:' + Math.min(100, Math.round(cur / need * 100)) + '%"></i></div><small class="muted">' + cur + ' / ' + need + ' XP bis Level ' + (l + 1) + ' · 🔥 ' + S.streak + ' Tage in Folge</small></section>'
+    + '<section class="card"><h3>Darstellung</h3><div class="chips">'
+    + [['system', 'System'], ['light', 'Hell'], ['dark', 'Dunkel']].map(([v, t]) => '<button class="chip' + (S.settings.theme === 'default' && m === v ? ' on' : '') + '" data-act="setMode" data-m="' + v + '">' + t + '</button>').join('') + '</div></section>'
+    + '<h3 style="margin-top:18px">Shop</h3><div class="list">';
+  for (const id of Object.keys(THEMES)){
+    const t = THEMES[id], owned = S.unlocked.includes(id), active = S.settings.theme === id;
+    h += '<div class="row static"><span class="swatch">' + t.sw.map(c => '<i style="background:' + c + '"></i>').join('') + '</span><span class="grow"><b>' + t.name + '</b><small class="muted">' + t.desc + '</small></span>'
+      + (active ? '<span class="chip on">Aktiv</span>' : owned ? '<button class="chip" data-act="useTheme" data-id="' + id + '">Anwenden</button>' : '<button class="chip" data-act="buyTheme" data-id="' + id + '">🪙 ' + t.price + '</button>') + '</div>';
+  }
+  h += '</div><div class="card"><h3>Belohnungen</h3><small class="muted">Hausaufgabe erledigt +10 XP / +5 🪙 · Note eintragen +5 XP / +2 🪙 (3× pro Tag) · Notiz anlegen +3 XP · täglicher Bonus mit Serie</small></div>'
+    + '<section class="card"><h3>Daten</h3><p class="muted" style="margin-top:0"><small>Alles bleibt auf diesem Gerät (offline, keine Konten, keine Werbung). Mach ab und zu ein Backup.</small></p>'
+    + '<div class="inline"><button class="btn ghost" data-act="export" style="flex:1">Backup speichern</button><label class="btn ghost" style="flex:1;text-align:center;color:var(--ac)">Backup laden<input type="file" accept=".json,application/json" hidden data-change="import"></label></div>'
+    + '<button class="btn danger" data-act="reset" style="width:100%;margin-top:10px">Alle Daten löschen</button></section>';
+  return h;
+}
+
+function render(){
+  const cv = $('#cv');
+  if (cv){ V.draft = cv.toDataURL(); const t = $('#nTitle'), x = $('#nText'); if (t) V.dTitle = t.value; if (x) V.dText = x.value; }
+  const v = { grades: viewGrades, plan: viewPlan, tasks: viewTasks, notes: viewNotes, me: viewMe }[V.tab]();
+  $('#view').innerHTML = v;
+  $('#tabs').innerHTML = '<div class="in">' + TABS.map(([id, ic, name]) => '<button class="' + (V.tab === id ? 'on' : '') + '" data-act="tab" data-tab="' + id + '"><span>' + ic + '</span>' + name + '</button>').join('') + '</div>';
+  if (V.tab === 'notes' && V.note) initCanvas();
+}
+
+// ---------- Zeichenbrett ----------
+function strokeStyle(ctx){ ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = D.erase ? '#ffffff' : D.color; ctx.lineWidth = D.erase ? D.size * 4 : D.size; }
+function seg(ctx, a, b){ strokeStyle(ctx); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
+function pushUndo(ctx, cv){ D.undo.push(ctx.getImageData(0, 0, cv.width, cv.height)); if (D.undo.length > 10) D.undo.shift(); }
+function initCanvas(){
+  const cv = $('#cv'); if (!cv) return;
+  const ctx = cv.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); D.undo = [];
+  const g = getNote(), src = V.draft || (g && g.n.drawing);
+  if (src){ const im = new Image(); im.onload = () => ctx.drawImage(im, 0, 0, cv.width, cv.height); im.src = src; }
+  let drawing = false, last = null;
+  const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * cv.width / r.width, (e.clientY - r.top) * cv.height / r.height]; };
+  cv.onpointerdown = e => { if (drawing) return; e.preventDefault(); cv.setPointerCapture(e.pointerId); drawing = true; pushUndo(ctx, cv); last = pos(e); seg(ctx, last, [last[0] + 0.01, last[1]]); };
+  cv.onpointermove = e => { if (!drawing) return; const p = pos(e); seg(ctx, last, p); last = p; };
+  cv.onpointerup = cv.onpointercancel = () => { drawing = false; };
+}
+function persistNote(silent){
+  const g = getNote(), cv = $('#cv'); if (!g || !cv) return;
+  g.n.title = $('#nTitle').value.trim(); g.n.text = $('#nText').value;
+  g.n.drawing = cv.toDataURL('image/png');
+  save(); if (!silent) toast('Gespeichert');
+}
+function closeNote(){ V.note = null; V.draft = V.dTitle = V.dText = undefined; }
+
+// ---------- Aktionen ----------
+const ACT = {
+  tab(el){ if (V.note) persistNote(true); closeNote(); V.tab = el.dataset.tab; V.sub = null; V.wish = ''; scrollTo(0, 0); },
+  toggleSys(){
+    const to = SYS() === 'classic' ? 'points' : 'classic';
+    if (S.subjects.some(s => s.grades.length) && !confirm('Notensystem wechseln? Vorhandene Noten werden umgerechnet (leicht verlustbehaftet).')) return false;
+    for (const s of S.subjects) for (const g of s.grades) g.value = to === 'points' ? toPoints(g.value) : toClassic(g.value);
+    S.settings.system = to; save();
+  },
+  openSub(el){ V.sub = el.dataset.id; V.wish = ''; scrollTo(0, 0); },
+  backSub(){ V.sub = null; V.wish = ''; },
+  delGrade(el){ const s = sub(V.sub); s.grades = s.grades.filter(g => g.id !== el.dataset.id); save(); },
+  delSub(){
+    const s = sub(V.sub); if (!s || !confirm('Fach „' + s.name + '“ mit allen Noten, Notizen und Aufgaben löschen?')) return false;
+    S.subjects = S.subjects.filter(x => x.id !== s.id); S.timetable = S.timetable.filter(x => x.subjectId !== s.id);
+    S.homework = S.homework.filter(x => x.subjectId !== s.id); S.exams = S.exams.filter(x => x.subjectId !== s.id);
+    V.sub = null; save();
+  },
+  toggleAB(){ S.settings.ab = !S.settings.ab; V.planWeek = null; save(); },
+  swapAB(){ const r = parseISO(S.settings.weekARef) || mondayOf(new Date()); r.setDate(r.getDate() + 7); S.settings.weekARef = iso(r); V.planWeek = null; save(); },
+  setWeek(el){ V.planWeek = el.dataset.w; },
+  setDay(el){ V.planDay = +el.dataset.d; },
+  toggleGrid(){ V.planGrid = !V.planGrid; },
+  gridCell(el){ V.planDay = +el.dataset.d; V.planGrid = false; },
+  doneHw(el){
+    const h = S.homework.find(x => x.id === el.dataset.id); if (!h) return false;
+    h.done = el.checked;
+    if (h.done && !h.rewarded){ h.rewarded = true; reward(10, 5); }
+    save();
+  },
+  delHw(el){ S.homework = S.homework.filter(x => x.id !== el.dataset.id); save(); },
+  delExam(el){ S.exams = S.exams.filter(x => x.id !== el.dataset.id); save(); },
+  toggleDone(){ V.showDone = !V.showDone; },
+  openNote(el){ V.note = { sid: el.dataset.sid, nid: el.dataset.nid }; V.draft = V.dTitle = V.dText = undefined; D.erase = false; scrollTo(0, 0); },
+  backNote(){ persistNote(true); closeNote(); },
+  saveNote(){ persistNote(false); return false; },
+  delNote(){
+    const g = getNote(); if (!g || !confirm('Notiz löschen?')) return false;
+    g.s.notes = g.s.notes.filter(n => n.id !== g.n.id); closeNote(); save();
+  },
+  toolColor(el){ D.color = el.dataset.c; D.erase = false; document.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b === el)); document.querySelector('[data-act=toolErase]').classList.remove('on'); return false; },
+  toolErase(el){ D.erase = !D.erase; el.classList.toggle('on', D.erase); document.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', !D.erase && b.dataset.c === D.color)); return false; },
+  undo(){ const cv = $('#cv'), p = D.undo.pop(); if (cv && p) cv.getContext('2d').putImageData(p, 0, 0); return false; },
+  clearCv(){ const cv = $('#cv'); if (!cv) return false; const ctx = cv.getContext('2d'); pushUndo(ctx, cv); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); return false; },
+  setMode(el){ S.settings.mode = el.dataset.m; S.settings.theme = 'default'; applyTheme(); save(); },
+  useTheme(el){ S.settings.theme = el.dataset.id; applyTheme(); save(); },
+  buyTheme(el){
+    const id = el.dataset.id, t = THEMES[id];
+    if (S.coins < t.price){ toast('Noch ' + (t.price - S.coins) + ' Münzen zu wenig'); return false; }
+    S.coins -= t.price; S.unlocked.push(id); S.settings.theme = id; applyTheme(); save(); toast(t.name + ' freigeschaltet!');
+  },
+  export(){
+    const blob = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'schulapp-backup-' + today() + '.json';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); return false;
+  },
+  reset(){
+    if (!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.')) return false;
+    S = defaults(); save(); applyTheme(); closeNote(); V.sub = null; V.tab = 'grades';
+  }
+};
+const today = () => iso(new Date());
+
+const FORM = {
+  addSubject(f){
+    const name = new FormData(f).get('name').trim(); if (!name) return false;
+    S.subjects.push({ id: uid(), name, teacher: '', room: '', color: COLORS[S.subjects.length % COLORS.length], grades: [], notes: [] }); save();
+  },
+  addGrade(f){
+    const d = new FormData(f), s = sub(V.sub), sys = SYS(), v = parseGrade(d.get('value'), sys);
+    if (v == null){ toast(sys === 'classic' ? 'Bitte eine Note von 1 bis 6 eingeben (z. B. 2+, 3, 4-).' : 'Bitte Punkte von 0 bis 15 eingeben.'); return false; }
+    s.grades.push({ id: uid(), title: d.get('title').trim(), value: v, weight: +d.get('w') || 1, date: today() });
+    if (S.gradeRewardDay !== today()){ S.gradeRewardDay = today(); S.gradeRewardsToday = 0; }
+    if (S.gradeRewardsToday < 3){ S.gradeRewardsToday++; reward(5, 2); }
+    save();
+  },
+  wish(f){
+    const d = new FormData(f), s = sub(V.sub), sys = SYS(), t = parseNum(d.get('t'));
+    const lo = sys === 'points' ? 0 : 1, hi = sys === 'points' ? 15 : 6;
+    if (!(t >= lo && t <= hi)){ V.wish = 'Bitte ein Ziel zwischen ' + lo + ' und ' + hi + ' eingeben.'; return; }
+    const r = wish(s.grades, t, +d.get('w') || 1, sys), n = fmtGrade(r.needed, sys), unit = sys === 'points' ? ' Punkte' : '';
+    V.wish = r.status === 'safe' ? 'Das Ziel ist schon sicher – selbst bei der schlechtesten Wertung.'
+      : r.status === 'impossible' ? 'Mit dieser Arbeit ist das Ziel nicht mehr erreichbar (selbst ' + n + unit + ' reichen nicht).'
+      : sys === 'classic' ? 'Du brauchst mindestens eine ' + n + ' in der nächsten Arbeit.' : 'Du brauchst mindestens ' + n + ' Punkte in der nächsten Arbeit.';
+  },
+  subInfo(f){ const d = new FormData(f), s = sub(V.sub); s.teacher = d.get('teacher').trim(); s.room = d.get('room').trim(); save(); toast('Gespeichert'); },
+  addHw(f){
+    const d = new FormData(f);
+    S.homework.push({ id: uid(), subjectId: d.get('s'), text: d.get('text').trim(), due: d.get('due') || '', done: false, rewarded: false, prio: +d.get('p') }); save();
+  },
+  addExam(f){ const d = new FormData(f); S.exams.push({ id: uid(), subjectId: d.get('s'), title: d.get('title').trim(), date: d.get('date') }); save(); },
+  addNote(f){
+    const d = new FormData(f), s = sub(d.get('s')); if (!s) return false;
+    const n = { id: uid(), title: d.get('title').trim(), text: '', drawing: '' };
+    s.notes.push(n); reward(3, 0); save(); V.note = { sid: s.id, nid: n.id }; V.draft = V.dTitle = V.dText = undefined; D.erase = false;
+  }
+};
+
+const CHG = {
+  slotSub(el){
+    const p = +el.dataset.p, ab = S.settings.ab, W = ab ? V.planWeek : weekOf(new Date(), S.settings.weekARef);
+    const ex = slotFor(V.planDay, p, W), id = el.value;
+    if (!id){ if (ex) S.timetable = S.timetable.filter(t => t !== ex); }
+    else if (ex) ex.subjectId = id;
+    else S.timetable.push({ id: uid(), day: V.planDay, period: p, subjectId: id, room: '', week: ab ? V.planWeek : 'both' });
+    save();
+  },
+  slotRoom(el){
+    const p = +el.dataset.p, ab = S.settings.ab, W = ab ? V.planWeek : weekOf(new Date(), S.settings.weekARef);
+    const ex = slotFor(V.planDay, p, W); if (ex){ ex.room = el.value.trim(); save(); }
+    return false;
+  },
+  import(el){
+    const f = el.files && el.files[0]; if (!f) return false;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const o = JSON.parse(r.result);
+        if (!o || !Array.isArray(o.subjects)) throw new Error('format');
+        if (!confirm('Backup laden? Die aktuellen Daten werden ersetzt.')) return;
+        S = Object.assign(defaults(), o); S.settings = Object.assign(defaults().settings, o.settings || {});
+        save(); applyTheme(); closeNote(); V.sub = null; render(); toast('Backup geladen');
+      } catch (e) { toast('Datei konnte nicht gelesen werden.'); }
+    };
+    r.readAsText(f); return false;
+  }
+};
+
+const app = document.body;
+app.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || !ACT[el.dataset.act]) return;
+  if (el.tagName === 'INPUT' && el.type !== 'checkbox') return;
+  if (ACT[el.dataset.act](el, e) !== false) render();
+});
+app.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]'); if (!f) return;
+  e.preventDefault();
+  if (FORM[f.dataset.form](f) !== false) render();
+});
+app.addEventListener('change', e => {
+  const el = e.target.closest('[data-change]'); if (!el) return;
+  if (CHG[el.dataset.change](el) !== false) render();
+});
+app.addEventListener('input', e => {
+  if (e.target.dataset && e.target.dataset.input === 'size') D.size = +e.target.value;
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && V.note) persistNote(true); });
+
+// ---------- Start ----------
+function dailyLogin(){
+  const t = today(); if (S.lastLogin === t) return;
+  const l = parseISO(S.lastLogin); let yest = false;
+  if (l){ l.setDate(l.getDate() + 1); yest = iso(l) === t; }
+  S.streak = yest ? S.streak + 1 : 1; S.lastLogin = t;
+  reward(5 + Math.min(S.streak, 7), 3); save();
+}
+applyTheme(); render(); dailyLogin();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
